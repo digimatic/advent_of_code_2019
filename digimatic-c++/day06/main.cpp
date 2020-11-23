@@ -4,6 +4,7 @@
 #include "config.h"
 
 #include <common/common.h>
+#include <common/graph.h>
 
 #include <algorithm>
 #include <cassert>
@@ -66,40 +67,27 @@ void solve_part1()
 void solve_part2()
 {
 	auto parsedInput = parseLines(readLines(string(inputFile)));
-	unordered_map<string, vector<string>> g;
+	Graph<string> g;
 	for(auto [x, y] : parsedInput)
 	{
-		g[x].push_back(y);
-		g[y].push_back(x);
+		g.edges[x].push_back(y);
+		g.edges[y].push_back(x);
 	}
 
-	unordered_set<string> visited;
-	string c = g["YOU"][0];
-	string d = g["SAN"][0];
-	int n = 0;
-	deque<pair<string, int>> q;
-	q.push_front({c, 0});
-	while(!q.empty())
-	{
-		auto [c, n] = q.front();
-		q.pop_front();
+	string c = g.edges["YOU"][0];
+	string d = g.edges["SAN"][0];
 
-		if(!visited.contains(c))
-		{
-			if(c == d)
-			{
-				cout << dayName << " - part 2: " << n << endl;
-				return;
-			}
-			visited.insert(c);
+	auto visit = [d](string c, int n) { return (c == d); };
+	auto next = [&g](string c, int n) {
+		auto neighbors = g.edges[c];
+		neighbors.erase(remove_if(begin(neighbors), end(neighbors),
+		                          [](string n) { return n == "YOU" || n == "SAN"; }),
+		                end(neighbors));
+		return neighbors;
+	};
 
-			for(auto next : g[c])
-			{
-				if(next != "YOU" && next != "SAN")
-					q.push_front({next, n + 1});
-			}
-		}
-	}
+	auto [_, n] = bfs(g, c, visit, next);
+
 	cout << dayName << " - part 2: " << n << endl;
 }
 

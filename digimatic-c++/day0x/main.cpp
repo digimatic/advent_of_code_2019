@@ -28,6 +28,13 @@ int parseLine(const string& line)
 	size_t taken = 0;
 	auto n = std::stoi(remaining, &taken);
 	return n;
+
+/*
+	regex re("(\\w+)\\)(\\w+)");
+	smatch m;
+	regex_match(line, m, re);
+	return {m[1].str(), m[2].str()};
+*/
 }
 
 vector<int> parseLines(const vector<string>& lines)
